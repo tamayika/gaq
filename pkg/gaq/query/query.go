@@ -1,6 +1,8 @@
-package parser
+package query
 
 import (
+	"log"
+
 	"github.com/alecthomas/participle"
 	"github.com/alecthomas/participle/lexer"
 	"github.com/alecthomas/participle/lexer/ebnf"
@@ -35,12 +37,22 @@ any = "\u0000"…"\uffff" .
 	parser = participle.MustBuild(&Query{}, participle.Lexer(queryLexer), participle.Unquote("String"))
 )
 
-// ParseQuery parses query and returns query ast
-func ParseQuery(q string) (*Query, error) {
+// Parse parses query and returns query ast
+func Parse(q string) (*Query, error) {
 	query := &Query{}
 	err := parser.ParseString(q, query)
 	if err != nil {
 		return nil, err
 	}
 	return query, nil
+}
+
+// MustParse parses query and returns query ast
+// If failed to parse, fatal occurs
+func MustParse(q string) *Query {
+	query, err := Parse(q)
+	if err != nil {
+		log.Fatalf("Cannot parse query. %v", q)
+	}
+	return query
 }

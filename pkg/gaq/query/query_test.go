@@ -1,4 +1,4 @@
-package parser
+package query
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseQuery(t *testing.T) {
+func TestParse(t *testing.T) {
 	type args struct {
 		q string
 	}
@@ -147,7 +147,7 @@ func TestParseQuery(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseQuery(tt.args.q)
+			got, err := Parse(tt.args.q)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseQuery() error = %v, wantErr %v", err, tt.wantErr)
 				return

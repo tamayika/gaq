@@ -18,12 +18,13 @@ type Node struct {
 	Pos      int     `json:"pos"`
 	End      int     `json:"end"`
 	Children []*Node `json:"children,omitempty"`
+	Parent   *Node   `json:"-"`
 
 	Node ast.Node `json:"-"`
 	Name string   `json:"-"`
 }
 
-// Parse parses source and returns ast
+// Parse parses source and returns *Node
 func Parse(source string) (*Node, error) {
 	// Create the AST by parsing src.
 	fset := token.NewFileSet() // positions are relative to fset
@@ -31,12 +32,7 @@ func Parse(source string) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	w := &walker{fset: fset}
-	ast.Walk(w, f)
-	if w.err != nil {
-		return nil, err
-	}
-	return w.node, nil
+	return ParseNode(f)
 }
 
 // MustParse parses source and returns ast
@@ -49,9 +45,27 @@ func MustParse(source string) *Node {
 	return n
 }
 
+// ParseNode parses ast.Node and returns *Node
+func ParseNode(n ast.Node) (*Node, error) {
+	w := &walker{}
+	ast.Walk(w, n)
+	if w.err != nil {
+		return nil, w.err
+	}
+	return w.node, nil
+}
+
+// MustParseNode parses ast.Node and returns *Node
+func MustParseNode(n ast.Node) *Node {
+	node, err := ParseNode(n)
+	if err != nil {
+		log.Fatalf("Cannot parse node. %v", err)
+	}
+	return node
+}
+
 type walker struct {
 	node *Node
-	fset *token.FileSet
 	err  error
 }
 
@@ -60,6 +74,7 @@ func (w *walker) Visit(node ast.Node) ast.Visitor {
 		return nil
 	}
 	child := buildNode(node)
+	child.Parent = w.node
 	if w.node == nil {
 		// for file
 		w.node = child
@@ -92,6 +107,24 @@ func nodeType(n interface{}) string {
 	return nt
 }
 
+// NextSibiling returns next sibling if exists
+func (n *Node) NextSibiling() *Node {
+	if n.Parent == nil {
+		return nil
+	}
+	index := -1
+	for i, child := range n.Parent.Children {
+		if child == n {
+			index = i
+		}
+	}
+	nextIndex := index + 1
+	if index < 0 || nextIndex >= len(n.Parent.Children) {
+		return nil
+	}
+	return n.Parent.Children[nextIndex]
+}
+
 // QuerySelector queries to node and return first matched node
 func (n *Node) QuerySelector(q *query.Query) ast.Node {
 	var firstNode ast.Node
@@ -115,24 +148,34 @@ func (n *Node) QuerySelectorAll(q *query.Query) []ast.Node {
 type callback func(n *Node) bool
 
 func (n *Node) apply(q *query.Query, entryIndex int, nodeDepth int, lastMatchedNodeDepth int, cb callback) bool {
-	if entryIndex >= len(q.Entries) {
-		return true
-	}
 	entry := q.Entries[entryIndex]
 	mustBeChild := entry.Combinator == ">"
+	mustBeDecendant := mustBeChild || entry.Combinator == ""
 	if mustBeChild && lastMatchedNodeDepth >= 0 && nodeDepth-lastMatchedNodeDepth > 1 {
 		return true
 	}
 	if entry.Name == n.Name {
 		if entryIndex+1 == len(q.Entries) {
-			continues := cb(n)
-			if !continues {
-				return false
-			}
+			return cb(n)
 		}
-		return n.applyChildren(q, entryIndex+1, nodeDepth+1, nodeDepth, cb)
+		nextEntry := q.Entries[entryIndex+1]
+		switch nextEntry.Combinator {
+		case ">", "":
+			return n.applyChildren(q, entryIndex+1, nodeDepth+1, nodeDepth, cb)
+		case "+":
+			nextSibling := n.NextSibiling()
+			if nextSibling == nil {
+				return true
+			}
+			return nextSibling.apply(q, entryIndex+1, nodeDepth, nodeDepth, cb)
+		default:
+			return true
+		}
 	}
-	return n.applyChildren(q, entryIndex, nodeDepth+1, lastMatchedNodeDepth, cb)
+	if mustBeDecendant {
+		return n.applyChildren(q, entryIndex, nodeDepth+1, lastMatchedNodeDepth, cb)
+	}
+	return true
 }
 
 func (n *Node) applyChildren(q *query.Query, entryIndex, nodeDepth int, lastMatchedNodeDepth int, cb callback) bool {

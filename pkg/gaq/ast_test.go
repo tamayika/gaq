@@ -19,6 +19,17 @@ func TestNode_QuerySelector(t *testing.T) {
 		want ast.Node
 	}{
 		{
+			"Not match",
+			MustParse(`package main
+			func f() {
+
+			}`),
+			args{
+				query.MustParse("GenDecl"),
+			},
+			nil,
+		},
+		{
 			"File",
 			MustParse(`package main`),
 			args{
@@ -39,8 +50,12 @@ func TestNode_QuerySelector(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.n.QuerySelector(tt.args.q)
-			assert.NotNil(t, got)
-			assert.IsType(t, tt.want, got)
+			if tt.want == nil {
+				assert.Nil(t, got)
+			} else {
+				assert.NotNil(t, got)
+				assert.IsType(t, tt.want, got)
+			}
 		})
 	}
 }
@@ -55,6 +70,18 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 		args args
 		want []ast.Node
 	}{
+		{
+
+			"Not match",
+			MustParse(`package main
+			func f() {
+
+			}`),
+			args{
+				query.MustParse("GenDecl"),
+			},
+			[]ast.Node{},
+		},
 		{
 			"File",
 			MustParse(`package main`),
@@ -106,6 +133,38 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			[]ast.Node{
 				&ast.Ident{Name: "main"},
 			},
+		},
+		{
+			"GenDecl + FuncDecl",
+			MustParse(`package main
+			import (
+				"os"
+			)
+			func f() {
+
+			}
+			`),
+			args{
+				query.MustParse("GenDecl + FuncDecl"),
+			},
+			[]ast.Node{
+				&ast.FuncDecl{},
+			},
+		},
+		{
+			"Not matched FuncDecl + FuncDecl",
+			MustParse(`package main
+			import (
+				"os"
+			)
+			func f() {
+
+			}
+			`),
+			args{
+				query.MustParse("FuncDecl + FuncDecl"),
+			},
+			[]ast.Node{},
 		},
 	}
 	for _, tt := range tests {

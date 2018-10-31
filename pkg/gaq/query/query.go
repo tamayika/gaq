@@ -27,14 +27,14 @@ var (
 	queryLexer = lexer.Must(ebnf.New(`
 Ident = (alpha | "_") { "_" | alpha | digit } .
 String = "\"" { "\u0000"…"\uffff"-"\""-"\\" | "\\" any } "\"" .
-Punct = "!"…"/" | ":"…"@" | "["…`+"\"`\""+` | "{"…"~" .
+Punct = "!"…"/" | ":"…"@" | "["…` + "\"`\"" + ` | "{"…"~" .
 Whitespace = " " | "\t" | "\n" | "\r" .
 
 alpha = "a"…"z" | "A"…"Z" .
 digit = "0"…"9" .
 any = "\u0000"…"\uffff" .
-`, ebnf.Elide("Whitespace")))
-	parser = participle.MustBuild(&Query{}, participle.Lexer(queryLexer), participle.Unquote("String"))
+`))
+	parser = participle.MustBuild(&Query{}, participle.Lexer(queryLexer), participle.Unquote("String"), participle.Elide("Whitespace"))
 )
 
 // Parse parses query and returns query ast

@@ -19,7 +19,7 @@ type Query struct {
 type Entry struct {
 	Pos lexer.Position
 
-	Combinator string `parser:"[ @('>' | '+') ]"`
+	Combinator string `parser:"[ @('>' | '+' | '~') ]"`
 	Name       string `parser:"@Ident"`
 }
 

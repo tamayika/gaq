@@ -166,6 +166,39 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			},
 			[]ast.Node{},
 		},
+		{
+			"GenDecl ~ FuncDecl",
+			MustParse(`package main
+			import (
+				"os"
+			)
+			func f() {
+
+			}
+			func f2() {
+
+			}
+			`),
+			args{
+				query.MustParse("GenDecl ~ FuncDecl"),
+			},
+			[]ast.Node{
+				&ast.FuncDecl{},
+				&ast.FuncDecl{},
+			},
+		},
+		{
+			"Not matched GenDecl ~ FuncDecl",
+			MustParse(`package main
+			import (
+				"os"
+			)
+			`),
+			args{
+				query.MustParse("GenDecl ~ FuncDecl"),
+			},
+			[]ast.Node{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

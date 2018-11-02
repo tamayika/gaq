@@ -25,10 +25,11 @@ For example, if you want to find `*ast.StructType`, NodeName is `StructType`.
 
 If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://github.com/tamayika/vscode-go-ast-explorer) will help you to find it out.
 
-Please see below supported combinator.
+### Supported combinators.
 
-|  Combinator  |           Meaning           |
-| ------------ | --------------------------- |
-| +            | Adjacent sibling combinator |
-| >            | Child combinator            |
-| (whitespace) | Descendant combinator       |
+|  Combinator  |            Name             |                                                 Meaning                                                 |
+| ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| +            | Adjacent sibling combinator | The second node directly follows the first, and both share the same parent.                             |
+| ~            | General sibling combinator  | The second node follows the first (though not necessarily immediately), and both share the same parent. |
+| >            | Child combinator            | Selects nodes that are direct children of the first node.                                               |
+| (whitespace) | Descendant combinator       | Selects nodes that are descendants of the first node.                                                   |

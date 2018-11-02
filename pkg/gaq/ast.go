@@ -125,6 +125,24 @@ func (n *Node) NextSibiling() *Node {
 	return n.Parent.Children[nextIndex]
 }
 
+// NextSibilings returns next siblings if exists
+func (n *Node) NextSibilings() []*Node {
+	if n.Parent == nil {
+		return nil
+	}
+	index := -1
+	for i, child := range n.Parent.Children {
+		if child == n {
+			index = i
+		}
+	}
+	nextIndex := index + 1
+	if index < 0 || nextIndex >= len(n.Parent.Children) {
+		return nil
+	}
+	return n.Parent.Children[nextIndex:]
+}
+
 // QuerySelector queries to node and return first matched node
 func (n *Node) QuerySelector(q *query.Query) ast.Node {
 	var firstNode ast.Node
@@ -168,6 +186,18 @@ func (n *Node) apply(q *query.Query, entryIndex int, nodeDepth int, lastMatchedN
 				return true
 			}
 			return nextSibling.apply(q, entryIndex+1, nodeDepth, nodeDepth, cb)
+		case "~":
+			nextSibilings := n.NextSibilings()
+			if nextSibilings == nil {
+				return true
+			}
+			for _, nextSibling := range nextSibilings {
+				continues := nextSibling.apply(q, entryIndex+1, nodeDepth, nodeDepth, cb)
+				if !continues {
+					return false
+				}
+			}
+			return true
 		default:
 			return true
 		}

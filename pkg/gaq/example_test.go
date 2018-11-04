@@ -14,17 +14,37 @@ import (
 	"github.com/tamayika/gaq/pkg/gaq/query"
 )
 
-var source = `package main
+func Example() {
+	// 1. parse Query
+	q, err := query.Parse("File > Ident")
+	if err != nil {
+		log.Fatalf("Cannot parse query. %v", err)
+	}
+	// or MustParse fatals if parse failed
+	// q := query.MustParse("File > Ident")
+
+	// 2. parse source
+	source := `package main`
+	node, err := gaq.Parse(source)
+	if err != nil {
+		log.Fatalf("Cannot parse node. %v", err)
+	}
+
+	// 3. run QuerySelector or QuerySelectorAll
+	fmt.Printf("%v\n", node.QuerySelector(q))
+	fmt.Printf("%v\n", node.QuerySelectorAll(q))
+}
+
+// Modify ast.Node to export all field in all struct type.
+func ExampleNode_QuerySelectorAll() {
+	source := `package main
 
 type User struct {
 	name string
 	age  int
-}
-`
+}`
+	q := query.MustParse("StructType > FieldList > Field")
 
-var q = query.MustParse("StructType > FieldList > Field")
-
-func ExampleNode_QuerySelectorAll_export_all_fields() {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "", source, parser.ParseComments)
 	if err != nil {

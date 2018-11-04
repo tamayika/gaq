@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
+      - image: circleci/golang:1.11
+    working_directory: /go/src/github.com/tamayika/gaq
+    steps:
+      - checkout
+
+      - run: go get -v -t -d ./...
+      - run: go test -v ./...

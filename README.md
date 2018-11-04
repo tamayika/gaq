@@ -54,15 +54,15 @@ If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://gi
 
 ### Supported Attribute Syntax
 
-|    Syntax    |                                                                 Meaning                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `[f]`        | Represents Node with an field name of f.                                                                                                |
-| `[f=value]`  | Represents Node with an field name of f whose value is exactly value.                                                                   |
-| `[f~=value]` | Represents Node with an field name of f whose value is a whitespace-separated list of words, one of which is exactly value.             |
-| `[f|=value]` | Represents Node with an field name of f whose value can be exactly value or can begin with value immediately followed by a hyphen, `-`. |
-| `[f^=value]` | Represents Node with an field name of f whose value is prefixed (preceded) by value.                                                    |
-| `[f$=value]` | Represents Node with an field name of f whose value is suffixed (followed) by value.                                                    |
-| `[f*=value]` | Represents Node with an field name of f whose value contains at least one occurrence of value within the string.                        |
+|    Syntax     |                                                                 Meaning                                                                 |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `[f]`         | Represents Node with an field name of f.                                                                                                |
+| `[f=value]`   | Represents Node with an field name of f whose value is exactly value.                                                                   |
+| `[f~=value]`  | Represents Node with an field name of f whose value is a whitespace-separated list of words, one of which is exactly value.             |
+| `[f\|=value]` | Represents Node with an field name of f whose value can be exactly value or can begin with value immediately followed by a hyphen, `-`. |
+| `[f^=value]`  | Represents Node with an field name of f whose value is prefixed (preceded) by value.                                                    |
+| `[f$=value]`  | Represents Node with an field name of f whose value is suffixed (followed) by value.                                                    |
+| `[f*=value]`  | Represents Node with an field name of f whose value contains at least one occurrence of value within the string.                        |
 
 ### Supported Pseudo Class
 

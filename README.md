@@ -14,7 +14,7 @@ GAQ is the library to query `ast.Node` children like JavaScript `querySelector` 
     - [CLI](#cli)
         - [Usage](#usage-1)
 - [Query Specfication](#query-specfication)
-    - [Supported Combinators.](#supported-combinators)
+    - [Supported Combinators](#supported-combinators)
     - [Supported Attribute Syntax](#supported-attribute-syntax)
     - [Supported Pseudo Class](#supported-pseudo-class)
 
@@ -96,7 +96,7 @@ For example, if you want to find `*ast.StructType`, NodeName is `StructType`.
 
 If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://github.com/tamayika/vscode-go-ast-explorer) will help you to find it out.
 
-## Supported Combinators.
+## Supported Combinators
 
 |  Combinator  |            Name             |                                                 Meaning                                                 |
 | ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------- |

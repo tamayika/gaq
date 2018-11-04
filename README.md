@@ -4,13 +4,48 @@ GAQ is the library to query `ast.Node` children like JavaScript `querySelector` 
 
 ## Install
 
+### Library
+
 ```sh
 go get github.com/tamayika/gaq/pkg/gaq
 ```
 
-## Usage
+#### Usage
 
-Please refer [pkg/gaq/example_test.go](pkg/gaq/example_test.go)
+Please refer [pkg/gaq/example_test.go](pkg/gaq/example_test.go) as 
+
+### CLI
+
+```sh
+go get github.com/tamayika/gaq
+```
+
+#### Usage
+
+You can see help with `--help` flag.
+
+```
+$ gaq --help
+gaq is the cli tool to query ast node.
+Typical usage is
+
+  cat <go file path> | gaq <Query>
+
+Please see details at https://github.com/tamayika/gaq
+
+Usage:
+  gaq <Query> [flags]
+
+Flags:
+  -h, --help   help for gaq
+```
+
+For example, `File > Ident` query filters package name in `main.go`
+
+```
+$ cat main.go | gaq "File > Ident"
+main
+```
 
 ## Query Specfication
 

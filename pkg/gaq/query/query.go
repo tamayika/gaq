@@ -96,7 +96,7 @@ func Parse(q string) (*Query, error) {
 func MustParse(q string) *Query {
 	query, err := Parse(q)
 	if err != nil {
-		log.Fatalf("Cannot parse query. %v", q)
+		log.Fatalf("Cannot parse query. %v", err)
 	}
 	return query
 }

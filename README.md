@@ -18,10 +18,10 @@ Heavily inspired by CSS Selector.
 
 ```
 Query:
-    Selector [, Selector]
+    Selector [',' Selector]
 
 Selector:
-    SimpleSelector [Combinator Selector]
+    SimpleSelector [Combinator SimpleSelector]
 
 SimpleSelector:
     NodeName[Attribute][Pseudo]

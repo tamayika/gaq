@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/tamayika/types-local.svg?style=svg)](https://circleci.com/gh/tamayika/types-local)
+[![CircleCI](https://circleci.com/gh/tamayika/gaq.svg?style=svg)](https://circleci.com/gh/tamayika/gaq)
 
 # GAQ(Go AST Query)
 

@@ -2,25 +2,43 @@
 
 GAQ is the library to query `ast.Node` children like JavaScript `querySelector` or `querySelectorAll`.
 
-## Install
+## Table of Contents
 
-### Library
+<!-- TOC -->
+
+- [GAQ(Go AST Query)](#gaqgo-ast-query)
+    - [Table of Contents](#table-of-contents)
+- [Install](#install)
+    - [Library](#library)
+        - [Usage](#usage)
+    - [CLI](#cli)
+        - [Usage](#usage-1)
+- [Query Specfication](#query-specfication)
+    - [Supported Combinators.](#supported-combinators)
+    - [Supported Attribute Syntax](#supported-attribute-syntax)
+    - [Supported Pseudo Class](#supported-pseudo-class)
+
+<!-- /TOC -->
+
+# Install
+
+## Library
 
 ```sh
 go get github.com/tamayika/gaq/pkg/gaq
 ```
 
-#### Usage
+### Usage
 
 Please refer [pkg/gaq/example_test.go](pkg/gaq/example_test.go) as 
 
-### CLI
+## CLI
 
 ```sh
 go get github.com/tamayika/gaq
 ```
 
-#### Usage
+### Usage
 
 You can see help with `--help` flag.
 
@@ -47,7 +65,7 @@ $ cat main.go | gaq "File > Ident"
 main
 ```
 
-## Query Specfication
+# Query Specfication
 
 Heavily inspired by CSS Selector.
 
@@ -59,7 +77,7 @@ Selector:
     SimpleSelector [Combinator SimpleSelector]
 
 SimpleSelector:
-    NodeName[Attribute][Pseudo]
+    NodeName [Attribute] [Pseudo]
 
 Attribute:
     '[' Field [ AttributeOperator Value ] ']'
@@ -78,7 +96,7 @@ For example, if you want to find `*ast.StructType`, NodeName is `StructType`.
 
 If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://github.com/tamayika/vscode-go-ast-explorer) will help you to find it out.
 
-### Supported combinators.
+## Supported Combinators.
 
 |  Combinator  |            Name             |                                                 Meaning                                                 |
 | ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -87,7 +105,7 @@ If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://gi
 | >            | Child combinator            | Selects nodes that are direct children of the first node.                                               |
 | (whitespace) | Descendant combinator       | Selects nodes that are descendants of the first node.                                                   |
 
-### Supported Attribute Syntax
+## Supported Attribute Syntax
 
 |    Syntax     |                                                                 Meaning                                                                 |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -99,7 +117,7 @@ If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://gi
 | `[f$=value]`  | Represents Node with an field name of f whose value is suffixed (followed) by value.                                                    |
 | `[f*=value]`  | Represents Node with an field name of f whose value contains at least one occurrence of value within the string.                        |
 
-### Supported Pseudo Class
+## Supported Pseudo Class
 
 |     Syntax     |                          Meaning                          |
 | -------------- | --------------------------------------------------------- |

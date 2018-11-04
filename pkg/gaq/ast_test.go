@@ -1,7 +1,9 @@
 package gaq
 
 import (
+	"fmt"
 	"go/ast"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -88,7 +90,13 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			args{
 				query.MustParse("File"),
 			},
-			[]ast.Node{&ast.File{}},
+			[]ast.Node{
+				&ast.File{
+					Name: &ast.Ident{
+						Name: "main",
+					},
+				},
+			},
 		},
 		{
 			"File Ident",
@@ -97,7 +105,44 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			args{
 				query.MustParse("File Ident"),
 			},
-			[]ast.Node{&ast.Ident{Name: "main"}},
+			[]ast.Node{
+				&ast.Ident{
+					Name: "main",
+				},
+			},
+		},
+		{
+			"File, Ident",
+			MustParse(`package main
+			`),
+			args{
+				query.MustParse("File, Ident"),
+			},
+			[]ast.Node{
+				&ast.File{
+					Name: &ast.Ident{
+						Name: "main",
+					},
+				},
+				&ast.Ident{
+					Name: "main",
+				},
+			},
+		},
+		{
+			"File, File",
+			MustParse(`package main
+			`),
+			args{
+				query.MustParse("File, File"),
+			},
+			[]ast.Node{
+				&ast.File{
+					Name: &ast.Ident{
+						Name: "main",
+					},
+				},
+			},
 		},
 		{
 			"File Ident",
@@ -113,8 +158,12 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 				query.MustParse("File Ident"),
 			},
 			[]ast.Node{
-				&ast.Ident{Name: "main"},
-				&ast.Ident{Name: "f"},
+				&ast.Ident{
+					Name: "main",
+				},
+				&ast.Ident{
+					Name: "f",
+				},
 			},
 		},
 		{
@@ -131,7 +180,9 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 				query.MustParse("File > Ident"),
 			},
 			[]ast.Node{
-				&ast.Ident{Name: "main"},
+				&ast.Ident{
+					Name: "main",
+				},
 			},
 		},
 		{
@@ -148,7 +199,11 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 				query.MustParse("GenDecl + FuncDecl"),
 			},
 			[]ast.Node{
-				&ast.FuncDecl{},
+				&ast.FuncDecl{
+					Name: &ast.Ident{
+						Name: "f",
+					},
+				},
 			},
 		},
 		{
@@ -183,8 +238,16 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 				query.MustParse("GenDecl ~ FuncDecl"),
 			},
 			[]ast.Node{
-				&ast.FuncDecl{},
-				&ast.FuncDecl{},
+				&ast.FuncDecl{
+					Name: &ast.Ident{
+						Name: "f",
+					},
+				},
+				&ast.FuncDecl{
+					Name: &ast.Ident{
+						Name: "f2",
+					},
+				},
 			},
 		},
 		{
@@ -199,15 +262,209 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			},
 			[]ast.Node{},
 		},
+		{
+			"File Ident[Name='a']",
+			MustParse(`package main
+			var a string
+			var ab string
+			var b string
+			var ba string
+			`),
+			args{
+				query.MustParse("File Ident[Name='a']"),
+			},
+			[]ast.Node{
+				&ast.Ident{
+					Name: "a",
+				},
+			},
+		},
+		{
+			"File Ident[Name^='a']",
+			MustParse(`package main
+			var a string
+			var ab string
+			var b string
+			var ba string
+			`),
+			args{
+				query.MustParse("File Ident[Name^='a']"),
+			},
+			[]ast.Node{
+				&ast.Ident{
+					Name: "a",
+				},
+				&ast.Ident{
+					Name: "ab",
+				},
+			},
+		},
+		{
+			"File Ident[Name$='a']",
+			MustParse(`package main
+			var a string
+			var ab string
+			var b string
+			var ba string
+			`),
+			args{
+				query.MustParse("File Ident[Name$='a']"),
+			},
+			[]ast.Node{
+				&ast.Ident{
+					Name: "a",
+				},
+				&ast.Ident{
+					Name: "ba",
+				},
+			},
+		},
+		{
+			"File Ident[Name*='a']",
+			MustParse(`package foo
+			var a string
+			var ab string
+			var b string
+			var ba string
+			`),
+			args{
+				query.MustParse("File Ident[Name*='a']"),
+			},
+			[]ast.Node{
+				&ast.Ident{
+					Name: "a",
+				},
+				&ast.Ident{
+					Name: "ab",
+				},
+				&ast.Ident{
+					Name: "ba",
+				},
+			},
+		},
+		{
+			"File StructType Field:first-child",
+			MustParse(`package foo
+
+			type s struct {
+				hoge string
+				huga string
+			}
+			`),
+			args{
+				query.MustParse("File StructType Field:first-child"),
+			},
+			[]ast.Node{&ast.Field{
+				Names: []*ast.Ident{
+					&ast.Ident{Name: "hoge"},
+				},
+				Type: &ast.Ident{Name: "string"},
+			},
+			},
+		},
+		{
+			"File StructType Field:last-child",
+			MustParse(`package foo
+
+			type s struct {
+				hoge string
+				huga string
+			}
+			`),
+			args{
+				query.MustParse("File StructType Field:last-child"),
+			},
+			[]ast.Node{
+				&ast.Field{
+					Names: []*ast.Ident{
+						&ast.Ident{Name: "huga"},
+					},
+					Type: &ast.Ident{Name: "string"},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.n.QuerySelectorAll(tt.args.q)
 			assert.NotNil(t, got)
-			assert.Len(t, got, len(tt.want))
-			for i := 0; i < len(tt.want); i++ {
-				assert.IsType(t, tt.want[i], got[i])
+			l := len(tt.want)
+			assert.Len(t, got, l)
+			if l > len(got) {
+				l = len(got)
+			}
+			if tt.name == "File StructType Field:last-child" {
+				fmt.Printf("%v\n", 10)
+			}
+			for i := 0; i < l; i++ {
+				equalIdent(t, tt.want[i], got[i])
 			}
 		})
 	}
+}
+
+func equalIdent(t *testing.T, n1 ast.Node, n2 ast.Node) bool {
+	sameType := assert.IsType(t, n1, n2)
+	if !sameType {
+		return false
+	}
+	n1Ident, n1Identok := n1.(*ast.Ident)
+	n2Ident, n2Identok := n2.(*ast.Ident)
+	if n1Identok && n2Identok {
+		return assert.Equal(t, n1Ident.Name, n2Ident.Name)
+	}
+	n1Value := reflect.ValueOf(n1).Elem()
+	n2Value := reflect.ValueOf(n2).Elem()
+	for i := 0; i < n1Value.NumField(); i++ {
+		n1Field := n1Value.Field(i)
+		n2Field := n2Value.Field(i)
+
+		switch n1Field.Type().Kind() {
+		case reflect.Ptr, reflect.Interface:
+			if n1Field.IsNil() && n2Field.IsNil() {
+				continue
+			}
+			n1FieldNode, n1Fieldok := n1Field.Interface().(ast.Node)
+			n2FieldNode, n2Fieldok := n2Field.Interface().(ast.Node)
+			if n1Field.IsNil() || n2Field.IsNil() {
+				isIdent := false
+				if n1FieldNode != nil {
+					_, ok := n1FieldNode.(*ast.Ident)
+					isIdent = isIdent || ok
+				}
+				if n2FieldNode != nil {
+					_, ok := n2FieldNode.(*ast.Ident)
+					isIdent = isIdent || ok
+				}
+				if isIdent {
+					assert.Equal(t, n1FieldNode, n2FieldNode)
+				}
+				continue
+			}
+
+			if n1Fieldok && n2Fieldok {
+				equalIdent(t, n1FieldNode, n2FieldNode)
+			} else {
+				assert.Equal(t, n1Field.Interface(), n2Field.Interface())
+			}
+		case reflect.Slice, reflect.Array:
+			if n1Field.IsNil() || n2Field.IsNil() {
+				continue
+			}
+			l := n1Field.Len()
+			if l > n2Field.Len() {
+				l = n2Field.Len()
+			}
+			for i := 0; i < l; i++ {
+				n1FieldNode, n1Fieldok := n1Field.Index(i).Interface().(ast.Node)
+				n2FieldNode, n2Fieldok := n2Field.Index(i).Interface().(ast.Node)
+				if n1Fieldok && n2Fieldok {
+					equalIdent(t, n1FieldNode, n2FieldNode)
+				} else {
+					assert.Equal(t, n1Field.Index(i).Interface(), n2Field.Index(i).Interface())
+				}
+			}
+		}
+	}
+	return true
 }

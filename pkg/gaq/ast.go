@@ -7,6 +7,8 @@ import (
 	"go/parser"
 	"go/token"
 	"log"
+	"os"
+	"reflect"
 	"strings"
 
 	"github.com/tamayika/gaq/pkg/gaq/query"
@@ -18,10 +20,11 @@ type Node struct {
 	Pos      int     `json:"pos"`
 	End      int     `json:"end"`
 	Children []*Node `json:"children,omitempty"`
-	Parent   *Node   `json:"-"`
 
-	Node ast.Node `json:"-"`
-	Name string   `json:"-"`
+	Parent *Node    `json:"-"`
+	Index  int      `json:"-"`
+	Node   ast.Node `json:"-"`
+	Name   string   `json:"-"`
 }
 
 // Parse parses source and returns *Node
@@ -75,6 +78,9 @@ func (w *walker) Visit(node ast.Node) ast.Visitor {
 	}
 	child := buildNode(node)
 	child.Parent = w.node
+	if child.Parent != nil {
+		child.Index = len(child.Parent.Children)
+	}
 	if w.node == nil {
 		// for file
 		w.node = child
@@ -94,6 +100,7 @@ func buildNode(n ast.Node) *Node {
 		Children: []*Node{},
 		Node:     n,
 		Name:     splits[len(splits)-1],
+		Index:    -1,
 	}
 	return node
 }
@@ -107,19 +114,24 @@ func nodeType(n interface{}) string {
 	return nt
 }
 
-// NextSibiling returns next sibling if exists
-func (n *Node) NextSibiling() *Node {
-	if n.Parent == nil {
-		return nil
-	}
-	index := -1
-	for i, child := range n.Parent.Children {
-		if child == n {
-			index = i
+// SameTypeChildren returns the same type of target Node among children
+func (n *Node) SameTypeChildren(target *Node) []*Node {
+	ret := []*Node{}
+	for _, child := range n.Children {
+		if child.Type == target.Type {
+			ret = append(ret, child)
 		}
 	}
-	nextIndex := index + 1
-	if index < 0 || nextIndex >= len(n.Parent.Children) {
+	return ret
+}
+
+// NextSibiling returns next sibling if exists
+func (n *Node) NextSibiling() *Node {
+	if n.Parent == nil || n.Index < 0 {
+		return nil
+	}
+	nextIndex := n.Index + 1
+	if nextIndex >= len(n.Parent.Children) {
 		return nil
 	}
 	return n.Parent.Children[nextIndex]
@@ -130,14 +142,8 @@ func (n *Node) NextSibilings() []*Node {
 	if n.Parent == nil {
 		return nil
 	}
-	index := -1
-	for i, child := range n.Parent.Children {
-		if child == n {
-			index = i
-		}
-	}
-	nextIndex := index + 1
-	if index < 0 || nextIndex >= len(n.Parent.Children) {
+	nextIndex := n.Index + 1
+	if nextIndex >= len(n.Parent.Children) {
 		return nil
 	}
 	return n.Parent.Children[nextIndex:]
@@ -146,53 +152,64 @@ func (n *Node) NextSibilings() []*Node {
 // QuerySelector queries to node and return first matched node
 func (n *Node) QuerySelector(q *query.Query) ast.Node {
 	var firstNode ast.Node
-	n.apply(q, 0, 0, -1, func(n *Node) bool {
-		firstNode = n.Node
-		return false
-	})
+	for _, selector := range q.Selectors {
+		n.apply(selector, 0, 0, -1, func(n *Node) bool {
+			firstNode = n.Node
+			return false
+		})
+		if firstNode != nil {
+			break
+		}
+	}
 	return firstNode
 }
 
 // QuerySelectorAll queries to node and return all matched nodes
 func (n *Node) QuerySelectorAll(q *query.Query) []ast.Node {
 	nodes := []ast.Node{}
-	n.apply(q, 0, 0, -1, func(n *Node) bool {
-		nodes = append(nodes, n.Node)
-		return true
-	})
+	addedNodes := map[*Node]bool{}
+	for _, selector := range q.Selectors {
+		n.apply(selector, 0, 0, -1, func(n *Node) bool {
+			if _, ok := addedNodes[n]; !ok {
+				nodes = append(nodes, n.Node)
+				addedNodes[n] = true
+			}
+			return true
+		})
+	}
 	return nodes
 }
 
 type callback func(n *Node) bool
 
-func (n *Node) apply(q *query.Query, entryIndex int, nodeDepth int, lastMatchedNodeDepth int, cb callback) bool {
-	entry := q.Entries[entryIndex]
-	mustBeChild := entry.Combinator == ">"
-	mustBeDecendant := mustBeChild || entry.Combinator == ""
+func (n *Node) apply(s *query.Selector, selectorIndex int, nodeDepth int, lastMatchedNodeDepth int, cb callback) bool {
+	ss := s.SimpleSelectors[selectorIndex]
+	mustBeChild := ss.Combinator == ">"
+	mustBeDecendant := mustBeChild || ss.Combinator == ""
 	if mustBeChild && lastMatchedNodeDepth >= 0 && nodeDepth-lastMatchedNodeDepth > 1 {
 		return true
 	}
-	if entry.Name == n.Name {
-		if entryIndex+1 == len(q.Entries) {
+	if ss.Name == n.Name && n.isMatchOptions(ss.Options) {
+		if selectorIndex+1 == len(s.SimpleSelectors) {
 			return cb(n)
 		}
-		nextEntry := q.Entries[entryIndex+1]
+		nextEntry := s.SimpleSelectors[selectorIndex+1]
 		switch nextEntry.Combinator {
 		case ">", "":
-			return n.applyChildren(q, entryIndex+1, nodeDepth+1, nodeDepth, cb)
+			return n.applyChildren(s, selectorIndex+1, nodeDepth+1, nodeDepth, cb)
 		case "+":
 			nextSibling := n.NextSibiling()
 			if nextSibling == nil {
 				return true
 			}
-			return nextSibling.apply(q, entryIndex+1, nodeDepth, nodeDepth, cb)
+			return nextSibling.apply(s, selectorIndex+1, nodeDepth, nodeDepth, cb)
 		case "~":
 			nextSibilings := n.NextSibilings()
 			if nextSibilings == nil {
 				return true
 			}
 			for _, nextSibling := range nextSibilings {
-				continues := nextSibling.apply(q, entryIndex+1, nodeDepth, nodeDepth, cb)
+				continues := nextSibling.apply(s, selectorIndex+1, nodeDepth, nodeDepth, cb)
 				if !continues {
 					return false
 				}
@@ -203,17 +220,102 @@ func (n *Node) apply(q *query.Query, entryIndex int, nodeDepth int, lastMatchedN
 		}
 	}
 	if mustBeDecendant {
-		return n.applyChildren(q, entryIndex, nodeDepth+1, lastMatchedNodeDepth, cb)
+		return n.applyChildren(s, selectorIndex, nodeDepth+1, lastMatchedNodeDepth, cb)
 	}
 	return true
 }
 
-func (n *Node) applyChildren(q *query.Query, entryIndex, nodeDepth int, lastMatchedNodeDepth int, cb callback) bool {
+func (n *Node) applyChildren(s *query.Selector, selectorIndex int, nodeDepth int, lastMatchedNodeDepth int, cb callback) bool {
 	for _, childNode := range n.Children {
-		continues := childNode.apply(q, entryIndex, nodeDepth, lastMatchedNodeDepth, cb)
+		continues := childNode.apply(s, selectorIndex, nodeDepth, lastMatchedNodeDepth, cb)
 		if !continues {
 			return false
 		}
 	}
 	return true
+}
+
+func (n *Node) isMatchOptions(opts []*query.SimpleSelectorOption) bool {
+	if opts == nil {
+		return true
+	}
+	for _, opt := range opts {
+		if !n.isMatchOption(opt) {
+			return false
+		}
+	}
+	return true
+}
+
+func (n *Node) isMatchOption(opt *query.SimpleSelectorOption) bool {
+	return n.isMatchOptionAttribute(opt.Attribute) && n.isMatchOptionPseudo(opt.Pseudo)
+
+}
+
+func (n *Node) isMatchOptionAttribute(oa *query.SimpleSelectorOptionAttribute) bool {
+	if oa == nil {
+		return true
+	}
+	nodeValue := reflect.ValueOf(n.Node).Elem()
+	field := nodeValue.FieldByName(oa.Name)
+	if !field.IsValid() {
+		return false
+	}
+	v := field.Interface()
+	value, ok := v.(string)
+	if !ok {
+		return false
+	}
+	switch oa.Operator {
+	case "=":
+		return oa.Value == value
+	case "~=":
+		splitted := strings.Split(value, " ")
+		found := false
+		for _, s := range splitted {
+			if s == oa.Value {
+				found = true
+				break
+			}
+		}
+		return found
+	case "|=":
+		return strings.Contains(value, fmt.Sprintf("%s-", oa.Value))
+	case "^=":
+		return strings.HasPrefix(value, oa.Value)
+	case "$=":
+		return strings.HasSuffix(value, oa.Value)
+	case "*=":
+		return strings.Contains(value, oa.Value)
+	}
+	return false
+}
+
+func (n *Node) isMatchOptionPseudo(op *query.SimpleSelectorOptionPseudo) bool {
+	if op == nil {
+		return true
+	}
+
+	switch op.Name {
+	case "first-child":
+		if n.Parent != nil {
+			for i, child := range n.Parent.SameTypeChildren(n) {
+				if child == n {
+					return i == 0
+				}
+			}
+		}
+	case "last-child":
+		if n.Parent != nil {
+			children := n.Parent.SameTypeChildren(n)
+			for i, child := range children {
+				if child == n {
+					return i == len(children)-1
+				}
+			}
+		}
+	default:
+		os.Stderr.WriteString(fmt.Sprintf("%s is not supported pseudo class.\n", op.Name))
+	}
+	return false
 }

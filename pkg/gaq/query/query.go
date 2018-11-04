@@ -12,21 +12,65 @@ import (
 type Query struct {
 	Pos lexer.Position
 
-	Entries []*Entry `parser:"{ @@ }"`
+	Selectors []*Selector `parser:"[ @@ { ',' @@ } ]"`
 }
 
-// Entry represents ast node name
-type Entry struct {
+// Selector represents multiple selectors node delimited by comma
+type Selector struct {
 	Pos lexer.Position
 
-	Combinator string `parser:"[ @('>' | '+' | '~') ]"`
-	Name       string `parser:"@Ident"`
+	SimpleSelectors []*SimpleSelector `parser:"@@ { @@ }"`
+}
+
+// SimpleSelector represents node selector with combinator and options
+type SimpleSelector struct {
+	Pos lexer.Position
+
+	Combinator string                  `parser:"[ @('>' | '+' | '~') ]"`
+	Name       string                  `parser:"@Ident"`
+	Options    []*SimpleSelectorOption `parser:"{ @@ }"`
+}
+
+// SimpleSelectorOption represents the option for SimpleSelector
+type SimpleSelectorOption struct {
+	Pos lexer.Position
+
+	Attribute *SimpleSelectorOptionAttribute `parser:"'[' @@ ']'"`
+	Pseudo    *SimpleSelectorOptionPseudo    `parser:"| ':' @@"`
+}
+
+// SimpleSelectorOptionAttribute represents the attribute option for SimpleSelector
+type SimpleSelectorOptionAttribute struct {
+	Pos lexer.Position
+
+	Name     string `parser:"@Ident"`
+	Operator string `parser:"[ @('=' | ('~' '=') | ('|' '=') | ('^' '=') | ('$' '=') | ('*' '=')) ]"`
+	Value    string `parser:"[ @(String | String2) ]"`
+}
+
+// SimpleSelectorOptionPseudo represents the pseudo option for SimpleSelector
+type SimpleSelectorOptionPseudo struct {
+	Pos lexer.Position
+
+	Name        string        `parser:"@Ident"`
+	Expressions []*Expression `parser:"[ '(' @@ { ',' @@ } ')' ]"`
+}
+
+// Expression represents the argument for SimpleSelectorOptionPseudo
+type Expression struct {
+	Pos lexer.Position
+
+	Number string `parser:"@Number"`
+	String string `parser:"| @(String | String2)"`
+	Name   string `parser:"| @Ident"`
 }
 
 var (
 	queryLexer = lexer.Must(ebnf.New(`
-Ident = (alpha | "_") { "_" | alpha | digit } .
+Ident = (alpha | "_") { "_" | "-" |alpha | digit } .
 String = "\"" { "\u0000"…"\uffff"-"\""-"\\" | "\\" any } "\"" .
+String2 = "'" { "\u0000"…"\uffff"-"'"-"\\" | "\\" any } "'" .
+Number = [ "-" | "+" ] digit { digit } .
 Punct = "!"…"/" | ":"…"@" | "["…` + "\"`\"" + ` | "{"…"~" .
 Whitespace = " " | "\t" | "\n" | "\r" .
 
@@ -34,7 +78,7 @@ alpha = "a"…"z" | "A"…"Z" .
 digit = "0"…"9" .
 any = "\u0000"…"\uffff" .
 `))
-	parser = participle.MustBuild(&Query{}, participle.Lexer(queryLexer), participle.Unquote("String"), participle.Elide("Whitespace"))
+	parser = participle.MustBuild(&Query{}, participle.Lexer(queryLexer), participle.Unquote("String", "String2"), participle.Elide("Whitespace"))
 )
 
 // Parse parses query and returns query ast

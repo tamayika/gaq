@@ -354,12 +354,49 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			args{
 				query.MustParse("File StructType Field:first-child"),
 			},
-			[]ast.Node{&ast.Field{
-				Names: []*ast.Ident{
-					&ast.Ident{Name: "hoge"},
+			[]ast.Node{
+				&ast.Field{
+					Names: []*ast.Ident{
+						&ast.Ident{Name: "hoge"},
+					},
+					Type: &ast.Ident{Name: "string"},
 				},
-				Type: &ast.Ident{Name: "string"},
 			},
+		},
+		{
+			"Not matched File > FuncDecl:first-child",
+			MustParse(`package foo
+			import (
+				"os"
+			)
+			func f() {
+
+			}
+			`),
+			args{
+				query.MustParse("File > FuncDecl:first-child"),
+			},
+			[]ast.Node{},
+		},
+		{
+			"File > FuncDecl:first-of-type",
+			MustParse(`package foo
+			import (
+				"os"
+			)
+			func f() {
+
+			}
+			`),
+			args{
+				query.MustParse("File > FuncDecl:first-of-type"),
+			},
+			[]ast.Node{
+				&ast.FuncDecl{
+					Name: &ast.Ident{
+						Name: "f",
+					},
+				},
 			},
 		},
 		{
@@ -381,6 +418,38 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 					},
 					Type: &ast.Ident{Name: "string"},
 				},
+			},
+		},
+		{
+			"Not matched File > GenDecl:last-child",
+			MustParse(`package foo
+			import (
+				"os"
+			)
+			func f() {
+
+			}
+			`),
+			args{
+				query.MustParse("File > GenDecl:last-child"),
+			},
+			[]ast.Node{},
+		},
+		{
+			"File > GenDecl:last-of-type",
+			MustParse(`package foo
+			import (
+				"os"
+			)
+			func f() {
+
+			}
+			`),
+			args{
+				query.MustParse("File > GenDecl:last-of-type"),
+			},
+			[]ast.Node{
+				&ast.GenDecl{},
 			},
 		},
 	}

@@ -298,6 +298,8 @@ func (n *Node) isMatchOptionPseudo(op *query.SimpleSelectorOptionPseudo) bool {
 
 	switch op.Name {
 	case "first-child":
+		return n.Index == 0
+	case "first-of-type":
 		if n.Parent != nil {
 			for i, child := range n.Parent.SameTypeChildren(n) {
 				if child == n {
@@ -306,6 +308,10 @@ func (n *Node) isMatchOptionPseudo(op *query.SimpleSelectorOptionPseudo) bool {
 			}
 		}
 	case "last-child":
+		if n.Parent != nil {
+			return n.Index == len(n.Parent.Children)-1
+		}
+	case "last-of-type":
 		if n.Parent != nil {
 			children := n.Parent.SameTypeChildren(n)
 			for i, child := range children {

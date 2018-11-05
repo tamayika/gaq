@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/tamayika/gaq.svg?style=svg)](https://circleci.com/gh/tamayika/gaq)
+
 # GAQ(Go AST Query)
 
 GAQ is the library to query `ast.Node` children like JavaScript `querySelector` or `querySelectorAll`.

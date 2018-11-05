@@ -93,6 +93,7 @@ Full used example
 
 Here, NodeName is one of node type of [ast](https://golang.org/pkg/go/ast/).
 For example, if you want to find `*ast.StructType`, NodeName is `StructType`.
+You can also specify `*` as any node type.
 
 If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://github.com/tamayika/vscode-go-ast-explorer) will help you to find it out.
 

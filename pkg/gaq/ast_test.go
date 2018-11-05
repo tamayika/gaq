@@ -85,6 +85,23 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			[]ast.Node{},
 		},
 		{
+			"*",
+			MustParse(`package main`),
+			args{
+				query.MustParse("*"),
+			},
+			[]ast.Node{
+				&ast.File{
+					Name: &ast.Ident{
+						Name: "main",
+					},
+				},
+				&ast.Ident{
+					Name: "main",
+				},
+			},
+		},
+		{
 			"File",
 			MustParse(`package main`),
 			args{

@@ -189,34 +189,42 @@ func (n *Node) apply(s *query.Selector, selectorIndex int, nodeDepth int, lastMa
 	if mustBeChild && lastMatchedNodeDepth >= 0 && nodeDepth-lastMatchedNodeDepth > 1 {
 		return true
 	}
-	if ss.Name == n.Name && n.isMatchOptions(ss.Options) {
+	if (ss.Name == n.Name || ss.Name == "*") && n.isMatchOptions(ss.Options) {
 		if selectorIndex+1 == len(s.SimpleSelectors) {
-			return cb(n)
-		}
-		nextEntry := s.SimpleSelectors[selectorIndex+1]
-		switch nextEntry.Combinator {
-		case ">", "":
-			return n.applyChildren(s, selectorIndex+1, nodeDepth+1, nodeDepth, cb)
-		case "+":
-			nextSibling := n.NextSibiling()
-			if nextSibling == nil {
-				return true
+			continues := cb(n)
+			if !continues {
+				return false
 			}
-			return nextSibling.apply(s, selectorIndex+1, nodeDepth, nodeDepth, cb)
-		case "~":
-			nextSibilings := n.NextSibilings()
-			if nextSibilings == nil {
-				return true
+			// if selector length is 1, we must continue to query
+			if len(s.SimpleSelectors) > 1 {
+				return continues
 			}
-			for _, nextSibling := range nextSibilings {
-				continues := nextSibling.apply(s, selectorIndex+1, nodeDepth, nodeDepth, cb)
-				if !continues {
-					return false
+		} else {
+			nextEntry := s.SimpleSelectors[selectorIndex+1]
+			switch nextEntry.Combinator {
+			case ">", "":
+				return n.applyChildren(s, selectorIndex+1, nodeDepth+1, nodeDepth, cb)
+			case "+":
+				nextSibling := n.NextSibiling()
+				if nextSibling == nil {
+					return true
 				}
+				return nextSibling.apply(s, selectorIndex+1, nodeDepth, nodeDepth, cb)
+			case "~":
+				nextSibilings := n.NextSibilings()
+				if nextSibilings == nil {
+					return true
+				}
+				for _, nextSibling := range nextSibilings {
+					continues := nextSibling.apply(s, selectorIndex+1, nodeDepth, nodeDepth, cb)
+					if !continues {
+						return false
+					}
+				}
+				return true
+			default:
+				return true
 			}
-			return true
-		default:
-			return true
 		}
 	}
 	if mustBeDecendant {

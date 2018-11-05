@@ -31,6 +31,36 @@ func TestParse(t *testing.T) {
 			false,
 		},
 		{
+			"*",
+			args{
+				q: "*",
+			},
+			&Query{
+				lexer.Position{
+					Line:   1,
+					Column: 1,
+				},
+				[]*Selector{
+					&Selector{
+						lexer.Position{
+							Line:   1,
+							Column: 1,
+						},
+						[]*SimpleSelector{
+							&SimpleSelector{
+								Pos: lexer.Position{
+									Line:   1,
+									Column: 1,
+								},
+								Name: "*",
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{
 			"Package",
 			args{
 				q: "Package",

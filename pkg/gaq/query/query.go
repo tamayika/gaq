@@ -27,7 +27,7 @@ type SimpleSelector struct {
 	Pos lexer.Position
 
 	Combinator string                  `parser:"[ @('>' | '+' | '~') ]"`
-	Name       string                  `parser:"@(Ident | '*')"`
+	Name       string                  `parser:"[ @(Ident | '*') ]"`
 	Options    []*SimpleSelectorOption `parser:"{ @@ }"`
 }
 

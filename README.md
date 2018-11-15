@@ -79,7 +79,7 @@ Selector:
     SimpleSelector [Combinator SimpleSelector]
 
 SimpleSelector:
-    NodeName [Attribute] [Pseudo]
+    [[NodeName] [Attribute] [Pseudo]]!
 
 Attribute:
     '[' Field [ AttributeOperator Value ] ']'

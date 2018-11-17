@@ -322,7 +322,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -369,7 +369,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -418,7 +418,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -467,7 +467,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -516,7 +516,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -565,7 +565,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -614,7 +614,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -663,7 +663,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -712,7 +712,7 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Attribute: &SimpleSelectorOptionAttribute{
+										Attribute: &Attribute{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
@@ -732,9 +732,9 @@ func TestParse(t *testing.T) {
 			false,
 		},
 		{
-			"Package:foo",
+			"Package:first-child",
 			args{
-				q: "Package:foo",
+				q: "Package:first-child",
 			},
 			&Query{
 				lexer.Position{
@@ -761,115 +761,17 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Pseudo: &SimpleSelectorOptionPseudo{
+										Pseudo: &Pseudo{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
 												Offset: 8,
 											},
-											Name: "foo",
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			false,
-		},
-		{
-			"Package:foo-bar",
-			args{
-				q: "Package:foo-bar",
-			},
-			&Query{
-				lexer.Position{
-					Line:   1,
-					Column: 1,
-				},
-				[]*Selector{
-					&Selector{
-						lexer.Position{
-							Line:   1,
-							Column: 1,
-						},
-						[]*SimpleSelector{
-							&SimpleSelector{
-								Pos: lexer.Position{
-									Line:   1,
-									Column: 1,
-								},
-								Name: "Package",
-								Options: []*SimpleSelectorOption{
-									&SimpleSelectorOption{
-										Pos: lexer.Position{
-											Line:   1,
-											Column: 8,
-											Offset: 7,
-										},
-										Pseudo: &SimpleSelectorOptionPseudo{
-											Pos: lexer.Position{
-												Line:   1,
-												Column: 9,
-												Offset: 8,
-											},
-											Name: "foo-bar",
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			false,
-		},
-		{
-			"Package:foo(bar)",
-			args{
-				q: "Package:foo(bar)",
-			},
-			&Query{
-				lexer.Position{
-					Line:   1,
-					Column: 1,
-				},
-				[]*Selector{
-					&Selector{
-						lexer.Position{
-							Line:   1,
-							Column: 1,
-						},
-						[]*SimpleSelector{
-							&SimpleSelector{
-								Pos: lexer.Position{
-									Line:   1,
-									Column: 1,
-								},
-								Name: "Package",
-								Options: []*SimpleSelectorOption{
-									&SimpleSelectorOption{
-										Pos: lexer.Position{
-											Line:   1,
-											Column: 8,
-											Offset: 7,
-										},
-										Pseudo: &SimpleSelectorOptionPseudo{
-											Pos: lexer.Position{
-												Line:   1,
-												Column: 9,
-												Offset: 8,
-											},
-											Name: "foo",
-											Expressions: []*Expression{
-												&Expression{
-													Pos: lexer.Position{
-														Line:   1,
-														Column: 13,
-														Offset: 12,
-													},
-													Name: "bar",
+											FirstChild: &PseudoFirstChild{
+												Pos: lexer.Position{
+													Line:   1,
+													Column: 9,
+													Offset: 8,
 												},
 											},
 										},
@@ -883,9 +785,9 @@ func TestParse(t *testing.T) {
 			false,
 		},
 		{
-			"Package:foo('bar')",
+			"Package:first-of-type",
 			args{
-				q: "Package:foo('bar')",
+				q: "Package:first-of-type",
 			},
 			&Query{
 				lexer.Position{
@@ -912,21 +814,17 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Pseudo: &SimpleSelectorOptionPseudo{
+										Pseudo: &Pseudo{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
 												Offset: 8,
 											},
-											Name: "foo",
-											Expressions: []*Expression{
-												&Expression{
-													Pos: lexer.Position{
-														Line:   1,
-														Column: 13,
-														Offset: 12,
-													},
-													String: "bar",
+											FirstOfType: &PseudoFirstOfType{
+												Pos: lexer.Position{
+													Line:   1,
+													Column: 9,
+													Offset: 8,
 												},
 											},
 										},
@@ -940,9 +838,9 @@ func TestParse(t *testing.T) {
 			false,
 		},
 		{
-			"Package:foo(10)",
+			"Package:last-child",
 			args{
-				q: "Package:foo(10)",
+				q: "Package:last-child",
 			},
 			&Query{
 				lexer.Position{
@@ -969,21 +867,70 @@ func TestParse(t *testing.T) {
 											Column: 8,
 											Offset: 7,
 										},
-										Pseudo: &SimpleSelectorOptionPseudo{
+										Pseudo: &Pseudo{
 											Pos: lexer.Position{
 												Line:   1,
 												Column: 9,
 												Offset: 8,
 											},
-											Name: "foo",
-											Expressions: []*Expression{
-												&Expression{
-													Pos: lexer.Position{
-														Line:   1,
-														Column: 13,
-														Offset: 12,
-													},
-													Number: "10",
+											LastChild: &PseudoLastChild{
+												Pos: lexer.Position{
+													Line:   1,
+													Column: 9,
+													Offset: 8,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{
+			"Package:last-of-type",
+			args{
+				q: "Package:last-of-type",
+			},
+			&Query{
+				lexer.Position{
+					Line:   1,
+					Column: 1,
+				},
+				[]*Selector{
+					&Selector{
+						lexer.Position{
+							Line:   1,
+							Column: 1,
+						},
+						[]*SimpleSelector{
+							&SimpleSelector{
+								Pos: lexer.Position{
+									Line:   1,
+									Column: 1,
+								},
+								Name: "Package",
+								Options: []*SimpleSelectorOption{
+									&SimpleSelectorOption{
+										Pos: lexer.Position{
+											Line:   1,
+											Column: 8,
+											Offset: 7,
+										},
+										Pseudo: &Pseudo{
+											Pos: lexer.Position{
+												Line:   1,
+												Column: 9,
+												Offset: 8,
+											},
+											LastOfType: &PseudoLastOfType{
+												Pos: lexer.Position{
+													Line:   1,
+													Column: 9,
+													Offset: 8,
 												},
 											},
 										},

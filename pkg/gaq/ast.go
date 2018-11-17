@@ -7,7 +7,6 @@ import (
 	"go/parser"
 	"go/token"
 	"log"
-	"os"
 	"reflect"
 	"strings"
 
@@ -260,7 +259,7 @@ func (n *Node) isMatchOption(opt *query.SimpleSelectorOption) bool {
 
 }
 
-func (n *Node) isMatchOptionAttribute(oa *query.SimpleSelectorOptionAttribute) bool {
+func (n *Node) isMatchOptionAttribute(oa *query.Attribute) bool {
 	if oa == nil {
 		return true
 	}
@@ -299,15 +298,14 @@ func (n *Node) isMatchOptionAttribute(oa *query.SimpleSelectorOptionAttribute) b
 	return false
 }
 
-func (n *Node) isMatchOptionPseudo(op *query.SimpleSelectorOptionPseudo) bool {
+func (n *Node) isMatchOptionPseudo(op *query.Pseudo) bool {
 	if op == nil {
 		return true
 	}
 
-	switch op.Name {
-	case "first-child":
+	if op.FirstChild != nil {
 		return n.Index == 0
-	case "first-of-type":
+	} else if op.FirstOfType != nil {
 		if n.Parent != nil {
 			for i, child := range n.Parent.SameTypeChildren(n) {
 				if child == n {
@@ -315,11 +313,11 @@ func (n *Node) isMatchOptionPseudo(op *query.SimpleSelectorOptionPseudo) bool {
 				}
 			}
 		}
-	case "last-child":
+	} else if op.LastChild != nil {
 		if n.Parent != nil {
 			return n.Index == len(n.Parent.Children)-1
 		}
-	case "last-of-type":
+	} else if op.LastOfType != nil {
 		if n.Parent != nil {
 			children := n.Parent.SameTypeChildren(n)
 			for i, child := range children {
@@ -328,8 +326,6 @@ func (n *Node) isMatchOptionPseudo(op *query.SimpleSelectorOptionPseudo) bool {
 				}
 			}
 		}
-	default:
-		os.Stderr.WriteString(fmt.Sprintf("%s is not supported pseudo class.\n", op.Name))
 	}
 	return false
 }

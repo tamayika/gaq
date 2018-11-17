@@ -35,12 +35,12 @@ type SimpleSelector struct {
 type SimpleSelectorOption struct {
 	Pos lexer.Position
 
-	Attribute *SimpleSelectorOptionAttribute `parser:"'[' @@ ']'"`
-	Pseudo    *SimpleSelectorOptionPseudo    `parser:"| ':' @@"`
+	Attribute *Attribute `parser:"'[' @@ ']'"`
+	Pseudo    *Pseudo    `parser:"| ':' @@"`
 }
 
-// SimpleSelectorOptionAttribute represents the attribute option for SimpleSelector
-type SimpleSelectorOptionAttribute struct {
+// Attribute represents the attribute option for SimpleSelector
+type Attribute struct {
 	Pos lexer.Position
 
 	Name     string `parser:"@Ident"`
@@ -48,21 +48,42 @@ type SimpleSelectorOptionAttribute struct {
 	Value    string `parser:"[ @(String | String2) ]"`
 }
 
-// SimpleSelectorOptionPseudo represents the pseudo option for SimpleSelector
-type SimpleSelectorOptionPseudo struct {
+// Pseudo represents the pseudo option for SimpleSelector
+type Pseudo struct {
 	Pos lexer.Position
 
-	Name        string        `parser:"@Ident"`
-	Expressions []*Expression `parser:"[ '(' @@ { ',' @@ } ')' ]"`
+	FirstChild  *PseudoFirstChild  `parser:"@@"`
+	FirstOfType *PseudoFirstOfType `parser:"| @@"`
+	LastChild   *PseudoLastChild   `parser:"| @@"`
+	LastOfType  *PseudoLastOfType  `parser:"| @@"`
 }
 
-// Expression represents the argument for SimpleSelectorOptionPseudo
-type Expression struct {
+// PseudoFirstChild represents the first-child pseudo
+type PseudoFirstChild struct {
 	Pos lexer.Position
 
-	Number string `parser:"@Number"`
-	String string `parser:"| @(String | String2)"`
-	Name   string `parser:"| @Ident"`
+	Name string `parser:"'first-child'"`
+}
+
+// PseudoFirstOfType represents the first-of-type pseudo
+type PseudoFirstOfType struct {
+	Pos lexer.Position
+
+	Name string `parser:"'first-of-type'"`
+}
+
+// PseudoLastChild represents the last-child pseudo
+type PseudoLastChild struct {
+	Pos lexer.Position
+
+	Name string `parser:"'last-child'"`
+}
+
+// PseudoLastOfType represents the last-of-type pseudo
+type PseudoLastOfType struct {
+	Pos lexer.Position
+
+	Name string `parser:"'last-of-type'"`
 }
 
 var (

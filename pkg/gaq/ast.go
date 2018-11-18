@@ -188,7 +188,7 @@ func (n *Node) apply(s *query.Selector, selectorIndex int, nodeDepth int, lastMa
 	if mustBeChild && lastMatchedNodeDepth >= 0 && nodeDepth-lastMatchedNodeDepth > 1 {
 		return true
 	}
-	if (ss.Name == n.Name || ss.Name == "*" || ss.Name == "") && n.isMatchOptions(ss.Options) {
+	if n.isMatchSimpleSelector(ss) {
 		if selectorIndex+1 == len(s.SimpleSelectors) {
 			continues := cb(n)
 			if !continues {
@@ -232,6 +232,10 @@ func (n *Node) apply(s *query.Selector, selectorIndex int, nodeDepth int, lastMa
 	return true
 }
 
+func (n *Node) isMatchSimpleSelector(ss *query.SimpleSelector) bool {
+	return (ss.Name == n.Name || ss.Name == "*" || ss.Name == "") && n.isMatchOptions(ss.Options)
+}
+
 func (n *Node) applyChildren(s *query.Selector, selectorIndex int, nodeDepth int, lastMatchedNodeDepth int, cb callback) bool {
 	for _, childNode := range n.Children {
 		continues := childNode.apply(s, selectorIndex, nodeDepth, lastMatchedNodeDepth, cb)
@@ -256,7 +260,6 @@ func (n *Node) isMatchOptions(opts []*query.SimpleSelectorOption) bool {
 
 func (n *Node) isMatchOption(opt *query.SimpleSelectorOption) bool {
 	return n.isMatchOptionAttribute(opt.Attribute) && n.isMatchOptionPseudo(opt.Pseudo)
-
 }
 
 func (n *Node) isMatchOptionAttribute(oa *query.Attribute) bool {
@@ -324,6 +327,12 @@ func (n *Node) isMatchOptionPseudo(op *query.Pseudo) bool {
 				return true
 			}
 		}
+	} else if op.Is != nil {
+		for _, selector := range op.Is.Selectors {
+			if n.isMatchSimpleSelector(selector.SimpleSelectors[0]) {
+				return true
+			}
+		}
 	} else if op.LastChild != nil {
 		if n.Parent != nil {
 			return n.Index == len(n.Parent.Children)-1
@@ -339,12 +348,7 @@ func (n *Node) isMatchOptionPseudo(op *query.Pseudo) bool {
 		}
 	} else if op.Not != nil {
 		for _, selector := range op.Not.Selectors {
-			found := false
-			n.apply(selector, 0, 0, -1, func(n *Node) bool {
-				found = true
-				return true
-			})
-			if found {
+			if n.isMatchSimpleSelector(selector.SimpleSelectors[0]) {
 				return false
 			}
 		}

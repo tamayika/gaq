@@ -456,6 +456,20 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			[]ast.Node{},
 		},
 		{
+			"*:is(InterfaceType, StructType)",
+			MustParse(`package foo
+			type I interface {}
+			type S struct {}
+			`),
+			args{
+				query.MustParse("*:is(InterfaceType, StructType)"),
+			},
+			[]ast.Node{
+				&ast.InterfaceType{},
+				&ast.StructType{},
+			},
+		},
+		{
 			"File StructType Field:last-child",
 			MustParse(`package foo
 
@@ -516,6 +530,19 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			`),
 			args{
 				query.MustParse("TypeSpec>*:not(InterfaceType):not(Ident)"),
+			},
+			[]ast.Node{
+				&ast.StructType{},
+			},
+		},
+		{
+			"TypeSpec>*:not(InterfaceType, Ident)",
+			MustParse(`package foo
+			type I interface {}
+			type S struct {}
+			`),
+			args{
+				query.MustParse("TypeSpec>*:not(InterfaceType, Ident)"),
 			},
 			[]ast.Node{
 				&ast.StructType{},

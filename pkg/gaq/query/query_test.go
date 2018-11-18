@@ -838,6 +838,78 @@ func TestParse(t *testing.T) {
 			false,
 		},
 		{
+			"Package:has(File)",
+			args{
+				q: "Package:has(File)",
+			},
+			&Query{
+				lexer.Position{
+					Line:   1,
+					Column: 1,
+				},
+				[]*Selector{
+					&Selector{
+						lexer.Position{
+							Line:   1,
+							Column: 1,
+						},
+						[]*SimpleSelector{
+							&SimpleSelector{
+								Pos: lexer.Position{
+									Line:   1,
+									Column: 1,
+								},
+								Name: "Package",
+								Options: []*SimpleSelectorOption{
+									&SimpleSelectorOption{
+										Pos: lexer.Position{
+											Line:   1,
+											Column: 8,
+											Offset: 7,
+										},
+										Pseudo: &Pseudo{
+											Pos: lexer.Position{
+												Line:   1,
+												Column: 9,
+												Offset: 8,
+											},
+											Has: &PseudoHas{
+												Pos: lexer.Position{
+													Line:   1,
+													Column: 9,
+													Offset: 8,
+												},
+												Selectors: []*Selector{
+													&Selector{
+														Pos: lexer.Position{
+															Line:   1,
+															Column: 13,
+															Offset: 12,
+														},
+														SimpleSelectors: []*SimpleSelector{
+															&SimpleSelector{
+																Pos: lexer.Position{
+																	Line:   1,
+																	Column: 13,
+																	Offset: 12,
+																},
+																Name: "File",
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{
 			"Package:last-child",
 			args{
 				q: "Package:last-child",

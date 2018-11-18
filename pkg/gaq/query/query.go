@@ -54,6 +54,7 @@ type Pseudo struct {
 
 	FirstChild  *PseudoFirstChild  `parser:"@@"`
 	FirstOfType *PseudoFirstOfType `parser:"| @@"`
+	Has         *PseudoHas         `parser:"| @@"`
 	LastChild   *PseudoLastChild   `parser:"| @@"`
 	LastOfType  *PseudoLastOfType  `parser:"| @@"`
 }
@@ -70,6 +71,14 @@ type PseudoFirstOfType struct {
 	Pos lexer.Position
 
 	Name string `parser:"'first-of-type'"`
+}
+
+// PseudoHas represents the has pseudo
+type PseudoHas struct {
+	Pos lexer.Position
+
+	Name string `parser:"'has'"`
+	Selectors []*Selector `parser:"'(' @@ { ',' @@ } ')'"`
 }
 
 // PseudoLastChild represents the last-child pseudo

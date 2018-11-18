@@ -313,6 +313,17 @@ func (n *Node) isMatchOptionPseudo(op *query.Pseudo) bool {
 				}
 			}
 		}
+	} else if op.Has != nil {
+		for _, selector := range op.Has.Selectors {
+			found := false
+			n.apply(selector, 0, 1, 0, func(n *Node) bool {
+				found = true
+				return true
+			})
+			if found {
+				return true
+			}
+		}
 	} else if op.LastChild != nil {
 		if n.Parent != nil {
 			return n.Index == len(n.Parent.Children)-1

@@ -417,6 +417,46 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			},
 		},
 		{
+			"File TypeSpec:has(Field)",
+			MustParse(`package foo
+
+			type s struct {
+				hoge string
+				huga string
+			}
+
+			type ss struct {
+
+			}
+			`),
+			args{
+				query.MustParse("File TypeSpec:has(Field)"),
+			},
+			[]ast.Node{
+				&ast.TypeSpec{
+					Name: &ast.Ident{Name: "s"},
+				},
+			},
+		},
+		{
+			"Not matched File TypeSpec:has(>Field)",
+			MustParse(`package foo
+
+			type s struct {
+				hoge string
+				huga string
+			}
+
+			type ss struct {
+
+			}
+			`),
+			args{
+				query.MustParse("File TypeSpec:has(>Field)"),
+			},
+			[]ast.Node{},
+		},
+		{
 			"File StructType Field:last-child",
 			MustParse(`package foo
 

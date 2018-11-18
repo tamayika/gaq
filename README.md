@@ -122,9 +122,10 @@ If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://gi
 
 ## Supported Pseudo Class
 
-|      Syntax      |                                Meaning                                |
-| ---------------- | --------------------------------------------------------------------- |
-| `:first-child`   | Represents the first node among a group of sibling nodes.             |
-| `:first-of-type` | Represents the first node of its type among a group of sibling nodes. |
-| `:last-child`    | Represents the last node among a group of sibling nodes.              |
-| `:last-of-type`  | Represents the last node of its type among a group of sibling nodes.  |
+|      Syntax      |                                Meaning                                                   |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `:first-child`   | Represents the first node among a group of sibling nodes.                                |
+| `:first-of-type` | Represents the first node of its type among a group of sibling nodes.                    |
+| `:has(Query)`    | Represents a node if any of the selectors passed as parameters, match at least one node. |
+| `:last-child`    | Represents the last node among a group of sibling nodes.                                 |
+| `:last-of-type`  | Represents the last node of its type among a group of sibling nodes.                     |

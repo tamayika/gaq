@@ -188,7 +188,7 @@ func (n *Node) apply(s *query.Selector, selectorIndex int, nodeDepth int, lastMa
 	if mustBeChild && lastMatchedNodeDepth >= 0 && nodeDepth-lastMatchedNodeDepth > 1 {
 		return true
 	}
-	if (ss.Name == n.Name || ss.Name == "*") && n.isMatchOptions(ss.Options) {
+	if (ss.Name == n.Name || ss.Name == "*" || ss.Name == "") && n.isMatchOptions(ss.Options) {
 		if selectorIndex+1 == len(s.SimpleSelectors) {
 			continues := cb(n)
 			if !continues {
@@ -337,6 +337,18 @@ func (n *Node) isMatchOptionPseudo(op *query.Pseudo) bool {
 				}
 			}
 		}
+	} else if op.Not != nil {
+		for _, selector := range op.Not.Selectors {
+			found := false
+			n.apply(selector, 0, 0, -1, func(n *Node) bool {
+				found = true
+				return true
+			})
+			if found {
+				return false
+			}
+		}
+		return true
 	}
 	return false
 }

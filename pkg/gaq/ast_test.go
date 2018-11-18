@@ -1,7 +1,6 @@
 package gaq
 
 import (
-	"fmt"
 	"go/ast"
 	"reflect"
 	"testing"
@@ -509,6 +508,19 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 				&ast.GenDecl{},
 			},
 		},
+		{
+			"TypeSpec>*:not(InterfaceType):not(Ident)",
+			MustParse(`package foo
+			type I interface {}
+			type S struct {}
+			`),
+			args{
+				query.MustParse("TypeSpec>*:not(InterfaceType):not(Ident)"),
+			},
+			[]ast.Node{
+				&ast.StructType{},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -518,9 +530,6 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			assert.Len(t, got, l)
 			if l > len(got) {
 				l = len(got)
-			}
-			if tt.name == "File StructType Field:last-child" {
-				fmt.Printf("%v\n", 10)
 			}
 			for i := 0; i < l; i++ {
 				equalIdent(t, tt.want[i], got[i])

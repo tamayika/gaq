@@ -1015,6 +1015,100 @@ func TestParse(t *testing.T) {
 			},
 			false,
 		},
+		{
+			"Package:not(:first-child)",
+			args{
+				q: "Package:not(:first-child)",
+			},
+			&Query{
+				lexer.Position{
+					Line:   1,
+					Column: 1,
+				},
+				[]*Selector{
+					&Selector{
+						lexer.Position{
+							Line:   1,
+							Column: 1,
+						},
+						[]*SimpleSelector{
+							&SimpleSelector{
+								Pos: lexer.Position{
+									Line:   1,
+									Column: 1,
+								},
+								Name: "Package",
+								Options: []*SimpleSelectorOption{
+									&SimpleSelectorOption{
+										Pos: lexer.Position{
+											Line:   1,
+											Column: 8,
+											Offset: 7,
+										},
+										Pseudo: &Pseudo{
+											Pos: lexer.Position{
+												Line:   1,
+												Column: 9,
+												Offset: 8,
+											},
+											Not: &PseudoNot{
+												Pos: lexer.Position{
+													Line:   1,
+													Column: 9,
+													Offset: 8,
+												},
+												Selectors: []*Selector{
+													&Selector{
+														Pos: lexer.Position{
+															Line:   1,
+															Column: 13,
+															Offset: 12,
+														},
+														SimpleSelectors: []*SimpleSelector{
+															&SimpleSelector{
+																Pos: lexer.Position{
+																	Line:   1,
+																	Column: 13,
+																	Offset: 12,
+																},
+																Options: []*SimpleSelectorOption{
+																	&SimpleSelectorOption{
+																		Pos: lexer.Position{
+																			Line:   1,
+																			Column: 13,
+																			Offset: 12,
+																		},
+																		Pseudo: &Pseudo{
+																			Pos: lexer.Position{
+																				Line:   1,
+																				Column: 14,
+																				Offset: 13,
+																			},
+																			FirstChild: &PseudoFirstChild{
+																				Pos: lexer.Position{
+																					Line:   1,
+																					Column: 14,
+																					Offset: 13,
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -24,8 +24,8 @@ func TestParse(t *testing.T) {
 			},
 			&Query{
 				Pos: lexer.Position{
-					Line:   1,
-					Column: 1,
+					Line:   0,
+					Column: 0,
 				},
 			},
 			false,

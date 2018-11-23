@@ -12,23 +12,23 @@ import (
 type Query struct {
 	Pos lexer.Position
 
-	Selectors []*Selector `parser:"[ @@ { ',' @@ } ]"`
+	Selectors []*Selector `parser:"( @@ ( ',' @@ )* )?"`
 }
 
-// Selector represents multiple selectors node delimited by comma
+// Selector represents multiple selectors node delimited by space
 type Selector struct {
 	Pos lexer.Position
 
-	SimpleSelectors []*SimpleSelector `parser:"@@ { @@ }"`
+	SimpleSelectors []*SimpleSelector `parser:"@@+"`
 }
 
 // SimpleSelector represents node selector with combinator and options
 type SimpleSelector struct {
 	Pos lexer.Position
 
-	Combinator string                  `parser:"[ @('>' | '+' | '~') ]"`
-	Name       string                  `parser:"[ @(Ident | '*') ]"`
-	Options    []*SimpleSelectorOption `parser:"{ @@ }"`
+	Combinator string                  `parser:"( @('>' | '+' | '~')?"`
+	Name       string                  `parser:"  @(Ident | '*')?"`
+	Options    []*SimpleSelectorOption `parser:"  @@* )!"`
 }
 
 // SimpleSelectorOption represents the option for SimpleSelector
@@ -44,8 +44,8 @@ type Attribute struct {
 	Pos lexer.Position
 
 	Name     string `parser:"@Ident"`
-	Operator string `parser:"[ @('=' | ('~' '=') | ('|' '=') | ('^' '=') | ('$' '=') | ('*' '=')) ]"`
-	Value    string `parser:"[ @(String | String2) ]"`
+	Operator string `parser:"@('=' | ('~' '=') | ('|' '=') | ('^' '=') | ('$' '=') | ('*' '='))?"`
+	Value    string `parser:"@(String | String2)?"`
 }
 
 // Pseudo represents the pseudo option for SimpleSelector
@@ -89,7 +89,7 @@ type PseudoHas struct {
 	Pos lexer.Position
 
 	Name      string      `parser:"'has'"`
-	Selectors []*Selector `parser:"'(' @@ { ',' @@ } ')'"`
+	Selectors []*Selector `parser:"'(' @@ ( ',' @@ )* ')'"`
 }
 
 // PseudoIs represents the is pseudo
@@ -97,7 +97,7 @@ type PseudoIs struct {
 	Pos lexer.Position
 
 	Name      string      `parser:"'is'"`
-	Selectors []*Selector `parser:"'(' @@ { ',' @@ } ')'"`
+	Selectors []*Selector `parser:"'(' @@ ( ',' @@ )* ')'"`
 }
 
 // PseudoLastChild represents the last-child pseudo
@@ -119,7 +119,7 @@ type PseudoNot struct {
 	Pos lexer.Position
 
 	Name      string      `parser:"'not'"`
-	Selectors []*Selector `parser:"'(' @@ { ',' @@ } ')'"`
+	Selectors []*Selector `parser:"'(' @@ ( ',' @@ )* ')'"`
 }
 
 // PseudoRoot represents the root pseudo

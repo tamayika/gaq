@@ -359,6 +359,24 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			},
 		},
 		{
+			"StructType FieldList:empty",
+			MustParse(`package foo
+
+			type a struct {
+			}
+			
+			type b struct {
+				f string
+			}
+			`),
+			args{
+				query.MustParse("StructType FieldList:empty"),
+			},
+			[]ast.Node{
+				&ast.FieldList{},
+			},
+		},
+		{
 			"File StructType Field:first-child",
 			MustParse(`package foo
 

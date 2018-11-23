@@ -52,13 +52,21 @@ type Attribute struct {
 type Pseudo struct {
 	Pos lexer.Position
 
-	FirstChild  *PseudoFirstChild  `parser:"@@"`
+	Empty       *PseudoEmpty       `parser:"@@"`
+	FirstChild  *PseudoFirstChild  `parser:"| @@"`
 	FirstOfType *PseudoFirstOfType `parser:"| @@"`
 	Has         *PseudoHas         `parser:"| @@"`
 	Is          *PseudoIs          `parser:"| @@"`
 	LastChild   *PseudoLastChild   `parser:"| @@"`
 	LastOfType  *PseudoLastOfType  `parser:"| @@"`
 	Not         *PseudoNot         `parser:"| @@"`
+}
+
+// PseudoEmpty represents the empty pseudo
+type PseudoEmpty struct {
+	Pos lexer.Position
+
+	Name string `parser:"'empty'"`
 }
 
 // PseudoFirstChild represents the first-child pseudo

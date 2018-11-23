@@ -306,7 +306,21 @@ func (n *Node) isMatchOptionPseudo(op *query.Pseudo) bool {
 		return true
 	}
 
-	if op.FirstChild != nil {
+	if op.Empty != nil {
+		if len(n.Children) == 0 {
+			return true
+		}
+		for _, child := range n.Children {
+			if _, ok := child.Node.(*ast.Comment); ok {
+				continue
+			}
+			if _, ok := child.Node.(*ast.CommentGroup); ok {
+				continue
+			}
+			return false
+		}
+		return true
+	} else if op.FirstChild != nil {
 		return n.Index == 0
 	} else if op.FirstOfType != nil {
 		if n.Parent != nil {

@@ -132,4 +132,4 @@ If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://gi
 | `:last-child`    | Represents the last node among a group of sibling nodes.                                                                                                        |
 | `:last-of-type`  | Represents the last node of its type among a group of sibling nodes.                                                                                            |
 | `:not(Query)`    | Represents nodes that do not match a list of selectors.                                                                                                         |
-| `:root`          | Represents the root node. When `gaq.Parse(source string)` is used, the root node is `*ast.File`. When `gaq.ParseNode(n ast.Node)` is used, the root node is `n` |
+| `:root`          | Represents the root node. <br>When `gaq.Parse(source string)` is used, the root node is `*ast.File`. <br>When `gaq.ParseNode(n ast.Node)` is used, the root node is `n`. |

@@ -32,13 +32,15 @@ go get github.com/tamayika/gaq/pkg/gaq
 
 ### Usage
 
-Please refer [pkg/gaq/example_test.go](pkg/gaq/example_test.go) as 
+Please refer [pkg/gaq/example_test.go](pkg/gaq/example_test.go)
 
 ## CLI
 
 ```sh
 go get github.com/tamayika/gaq
 ```
+
+or there are binaries for various os at [Releases](https://github.com/tamayika/gaq/releases).
 
 ### Usage
 

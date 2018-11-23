@@ -367,6 +367,8 @@ func (n *Node) isMatchOptionPseudo(op *query.Pseudo) bool {
 			}
 		}
 		return true
+	} else if op.Root != nil {
+		return n.Parent == nil
 	}
 	return false
 }

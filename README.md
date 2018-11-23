@@ -122,13 +122,14 @@ If you don't know NodeName, VSCode extension [vscode-go-ast-explorer](https://gi
 
 ## Supported Pseudo Class
 
-|      Syntax      |                                Meaning                                                      |
-| ---------------- | ------------------------------------------------------------------------------------------- |
-| `:empty`         | Represents nodes that has no children. `ast.CommentGroup` and `ast.Comment` are ignored.    |
-| `:first-child`   | Represents the first node among a group of sibling nodes.                                   |
-| `:first-of-type` | Represents the first node of its type among a group of sibling nodes.                       |
-| `:has(Query)`    | Represents a node if any of the selectors passed as parameters, match at least one node.    |
-| `:is(Query)`     | Represents nodes that can be selected by one of the selectors in that list                  |
-| `:last-child`    | Represents the last node among a group of sibling nodes.                                    |
-| `:last-of-type`  | Represents the last node of its type among a group of sibling nodes.                        |
-| `:not(Query)`    | Represents nodes that do not match a list of selectors.                                     |
+|      Syntax      |                                                                             Meaning                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:empty`         | Represents nodes that has no children. `ast.CommentGroup` and `ast.Comment` are ignored.                                                                        |
+| `:first-child`   | Represents the first node among a group of sibling nodes.                                                                                                       |
+| `:first-of-type` | Represents the first node of its type among a group of sibling nodes.                                                                                           |
+| `:has(Query)`    | Represents a node if any of the selectors passed as parameters, match at least one node.                                                                        |
+| `:is(Query)`     | Represents nodes that can be selected by one of the selectors in that list                                                                                      |
+| `:last-child`    | Represents the last node among a group of sibling nodes.                                                                                                        |
+| `:last-of-type`  | Represents the last node of its type among a group of sibling nodes.                                                                                            |
+| `:not(Query)`    | Represents nodes that do not match a list of selectors.                                                                                                         |
+| `:root`          | Represents the root node. When `gaq.Parse(source string)` is used, the root node is `*ast.File`. When `gaq.ParseNode(n ast.Node)` is used, the root node is `n` |

@@ -566,6 +566,30 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 				&ast.StructType{},
 			},
 		},
+		{
+			"File:root",
+			MustParse(`package foo
+			`),
+			args{
+				query.MustParse("File:root"),
+			},
+			[]ast.Node{
+				&ast.File{
+					Name: &ast.Ident{Name: "foo"},
+				},
+			},
+		},
+		{
+			"Not matched TypeSpec:root",
+			MustParse(`package foo
+			type s struct {}
+			`),
+			args{
+				query.MustParse("TypeSpec:root"),
+			},
+			[]ast.Node{
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

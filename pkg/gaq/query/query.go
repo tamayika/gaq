@@ -60,6 +60,7 @@ type Pseudo struct {
 	LastChild   *PseudoLastChild   `parser:"| @@"`
 	LastOfType  *PseudoLastOfType  `parser:"| @@"`
 	Not         *PseudoNot         `parser:"| @@"`
+	Root        *PseudoRoot        `parser:"| @@"`
 }
 
 // PseudoEmpty represents the empty pseudo
@@ -119,6 +120,13 @@ type PseudoNot struct {
 
 	Name      string      `parser:"'not'"`
 	Selectors []*Selector `parser:"'(' @@ { ',' @@ } ')'"`
+}
+
+// PseudoRoot represents the root pseudo
+type PseudoRoot struct {
+	Pos lexer.Position
+
+	Name string `parser:"'root'"`
 }
 
 var (

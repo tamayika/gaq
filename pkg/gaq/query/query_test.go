@@ -1234,6 +1234,59 @@ func TestParse(t *testing.T) {
 			},
 			false,
 		},
+		{
+			"Package:root",
+			args{
+				q: "Package:root",
+			},
+			&Query{
+				lexer.Position{
+					Line:   1,
+					Column: 1,
+				},
+				[]*Selector{
+					&Selector{
+						lexer.Position{
+							Line:   1,
+							Column: 1,
+						},
+						[]*SimpleSelector{
+							&SimpleSelector{
+								Pos: lexer.Position{
+									Line:   1,
+									Column: 1,
+								},
+								Name: "Package",
+								Options: []*SimpleSelectorOption{
+									&SimpleSelectorOption{
+										Pos: lexer.Position{
+											Line:   1,
+											Column: 8,
+											Offset: 7,
+										},
+										Pseudo: &Pseudo{
+											Pos: lexer.Position{
+												Line:   1,
+												Column: 9,
+												Offset: 8,
+											},
+											Root: &PseudoRoot{
+												Pos: lexer.Position{
+													Line:   1,
+													Column: 9,
+													Offset: 8,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -52,6 +52,7 @@ gaq is the cli tool to query ast node.
 Typical usage is
 
   cat <go file path> | gaq <Query>
+  cat <go file path> | gaq -m replace <Query> <Replace command>
 
 Please see details at https://github.com/tamayika/gaq
 
@@ -59,8 +60,15 @@ Usage:
   gaq <Query> [flags]
 
 Flags:
-  -h, --help   help for gaq
+  -f, --format string   Output format, 'text' or 'pos'. Default is 'text' (default "text")
+  -h, --help            help for gaq
+  -m, --mode string     Execution mode, 'filter' or 'replace'. Default is 'filter' (default "filter")
+      --version         version for gaq
 ```
+
+#### Filter mode
+
+Default mode is `filter`.
 
 For example, `File > Ident` query filters package name in `main.go`
 
@@ -68,6 +76,25 @@ For example, `File > Ident` query filters package name in `main.go`
 $ cat main.go | gaq "File > Ident"
 main
 ```
+
+#### Replace mode
+
+You can replace matched node text by `replace` mode.
+
+For example, below command exports functions except `main` function.
+
+```
+$ cat main.go | gaq -m replace "FuncDecl > Ident:not([Name='main'])" -- sed -e "s/^\(.\)/\U\1/"
+```
+
+In `replace` mode, below sequence is executed for each matched node
+
+1. command is spawned
+2. gaq passes node text as stdin
+3. wait command exit
+4. replace node text by command output
+
+You can use any tool which gets input from stdin and puts result to stdout, `sed`, `awk`, `tr` etc.
 
 # Query Specfication
 

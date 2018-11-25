@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/tamayika/gaq/pkg/gaq"
@@ -30,8 +34,45 @@ func printPos(nodes []ast.Node) {
 	}
 }
 
+func replaceByCommand(source []byte, fset *token.FileSet, nodes []ast.Node, commands []string) []byte {
+	ret := []byte{}
+	var lastNode ast.Node
+	for _, node := range nodes {
+		pos := fset.Position(node.Pos())
+		end := fset.Position(node.End())
+		nodeText := source[pos.Offset:end.Offset]
+		var stderr bytes.Buffer
+		cmd := exec.Command(commands[0], commands[1:]...)
+		cmd.Stderr = &stderr
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			log.Fatalf("Cannot get stdin pipe. %v", err)
+		}
+		io.WriteString(stdin, string(nodeText))
+		stdin.Close()
+		replacedText, err := cmd.Output()
+		if err != nil {
+			log.Fatalf("Command failed.\nerr: %v\nstderr: %s\nnodeText: %s", err, strings.TrimSuffix(string(stderr.String()), "\n"), string(nodeText))
+		}
+		if lastNode == nil {
+			ret = append(ret, source[:pos.Offset]...)
+		} else {
+			ret = append(ret, source[fset.Position(lastNode.End()).Offset:pos.Offset]...)
+		}
+		ret = append(ret, replacedText...)
+		lastNode = node
+	}
+	if lastNode == nil {
+		ret = source
+	} else {
+		ret = append(ret, source[fset.Position(lastNode.End()).Offset:]...)
+	}
+	return ret
+}
+
 func main() {
 	var format string
+	var mode string
 
 	rootCmd := &cobra.Command{
 		Use:   "gaq <Query>",
@@ -40,9 +81,10 @@ func main() {
 Typical usage is
 
   cat <go file path> | gaq <Query>
+  cat <go file path> | gaq -m replace <Query> <Replace command>
 
 Please see details at https://github.com/tamayika/gaq`,
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MinimumNArgs(1),
 		Version: version,
 		Run: func(cmd *cobra.Command, args []string) {
 			data, err := ioutil.ReadAll(os.Stdin)
@@ -58,17 +100,28 @@ Please see details at https://github.com/tamayika/gaq`,
 
 			q := query.MustParse(args[0])
 			nodes := node.QuerySelectorAll(q)
-			switch format {
-			case "text":
-				printText(data, fset, nodes)
-			case "pos":
-				printPos(nodes)
+			switch mode {
+			case "filter":
+				switch format {
+				case "text":
+					printText(data, fset, nodes)
+				case "pos":
+					printPos(nodes)
+				default:
+					log.Fatalf("Format: %s is not supported.", format)
+				}
+			case "replace":
+				if len(args) < 2 {
+					log.Fatalf("One or more command and args are expected in replace mode.")
+				}
+				fmt.Println(string(replaceByCommand(data, fset, nodes, args[1:])))
 			default:
-				log.Fatalf("Format: %s is not supported.", format)
+				log.Fatalf("Mode: %s is not supported.", mode)
 			}
 		},
 	}
 	rootCmd.PersistentFlags().StringVarP(&format, "format", "f", "text", "Output format, 'text' or 'pos'. Default is 'text'")
+	rootCmd.PersistentFlags().StringVarP(&mode, "mode", "m", "filter", "Execution mode, 'filter' or 'replace'. Default is 'filter'")
 	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}`)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

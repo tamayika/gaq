@@ -15,6 +15,8 @@ GAQ is the library to query `ast.Node` children like JavaScript `querySelector` 
         - [Usage](#usage)
     - [CLI](#cli)
         - [Usage](#usage-1)
+            - [Filter Mode](#filter-mode)
+            - [Replace Mode](#replace-mode)
 - [Query Specfication](#query-specfication)
     - [Supported Combinators](#supported-combinators)
     - [Supported Attribute Syntax](#supported-attribute-syntax)
@@ -66,7 +68,7 @@ Flags:
       --version         version for gaq
 ```
 
-#### Filter mode
+#### Filter Mode
 
 Default mode is `filter`.
 
@@ -77,7 +79,7 @@ $ cat main.go | gaq "File > Ident"
 main
 ```
 
-#### Replace mode
+#### Replace Mode
 
 You can replace matched node text by `replace` mode.
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/ast"
 	"go/parser"
 	"go/token"
 	"io/ioutil"
@@ -15,7 +16,23 @@ import (
 
 var version = "dev"
 
+func printText(source []byte, fset *token.FileSet, nodes []ast.Node) {
+	for _, node := range nodes {
+		pos := fset.Position(node.Pos())
+		end := fset.Position(node.End())
+		fmt.Println(string(source[pos.Offset:end.Offset]))
+	}
+}
+
+func printPos(nodes []ast.Node) {
+	for _, node := range nodes {
+		fmt.Printf("%d,%d\n", node.Pos(), node.End())
+	}
+}
+
 func main() {
+	var format string
+
 	rootCmd := &cobra.Command{
 		Use:   "gaq <Query>",
 		Short: "gaq is the cli tool to query ast node. STDIN needed as go code.",
@@ -41,13 +58,17 @@ Please see details at https://github.com/tamayika/gaq`,
 
 			q := query.MustParse(args[0])
 			nodes := node.QuerySelectorAll(q)
-			for _, node := range nodes {
-				pos := fset.Position(node.Pos())
-				end := fset.Position(node.End())
-				fmt.Println(string(data[pos.Offset:end.Offset]))
+			switch format {
+			case "text":
+				printText(data, fset, nodes)
+			case "pos":
+				printPos(nodes)
+			default:
+				log.Fatalf("Format: %s is not supported.", format)
 			}
 		},
 	}
+	rootCmd.PersistentFlags().StringVarP(&format, "format", "f", "text", "Output format, 'text' or 'pos'. Default is 'text'")
 	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}`)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

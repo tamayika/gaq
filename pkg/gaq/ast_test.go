@@ -587,8 +587,7 @@ func TestNode_QuerySelectorAll(t *testing.T) {
 			args{
 				query.MustParse("TypeSpec:root"),
 			},
-			[]ast.Node{
-			},
+			[]ast.Node{},
 		},
 	}
 	for _, tt := range tests {
